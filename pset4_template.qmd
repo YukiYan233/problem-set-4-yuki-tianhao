@@ -30,7 +30,7 @@ Please refer to the minilesson on code style
     - Partner 1 (name and cnet ID): Yuki Yan & yukiyan
     - Partner 2 (name and cnet ID): Tianhao Zhang & tz2205
 3. Partner 1 will accept the `ps4` and then share the link it creates with their partner. You can only share it with one partner so you will not be able to change it after your partner has accepted. 
-4. "This submission is our work alone and complies with the 30538 integrity policy." Add your initials to indicate your agreement: \*\*\Y\Y\*\* \*\*\T\Z\*\*
+4. "This submission is our work alone and complies with the 30538 integrity policy." Add your initials to indicate your agreement: \*\*YY\*\* \*\*TZ\*\*
 5. "I have uploaded the names of anyone else other than my partner and I worked with on the problem set **[here](https://docs.google.com/forms/d/185usrCREQaUbvAXpWhChkjghdGgmAZXA3lPWpXLLsts/edit)**"  (1 point)
 6. Late coins used this pset: \*\*\1\_\*\* Late coins left after submission: \*\*\1\_\*\*
 7. Knit your `ps4.qmd` to an PDF file to make `ps4.pdf`, 
@@ -57,7 +57,9 @@ PRVDR_NUM - Provider Number
 
 2. 
     a.
- ```{python}
+```{python}
+import warnings
+warnings.filterwarnings("ignore")
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -96,7 +98,6 @@ plt.yticks(range(min(observations_by_year) - 10, max(observations_by_year) + 10,
 
 plt.xticks(rotation=0)
 plt.show()
-
 ```
 
 4. 
@@ -119,7 +120,6 @@ plt.show()
 
 # Display the count for reference
 print(unique_hospitals_by_year)
-
 ```
 
     b.
@@ -159,12 +159,14 @@ suspected_closures_list = suspected_closures[['FAC_NAME', 'ZIP_CD', 'Suspected_C
 total_suspected_closures = len(suspected_closures)
 print(total_suspected_closures)
 ```
+
 15730 hospital fit this definition
 2. 
 ```{python}
 sorted_suspected_closures = suspected_closures_list.sort_values(by='FAC_NAME')
 sorted_suspected_closures.head(10)
 ```
+
 3. 
     a.
     ```{python}
@@ -344,6 +346,7 @@ total_rows = len(zips_texas_centroids)
 estimated_time = (elapsed_time / 10) * total_rows
 print(f"Estimated time for full dataset: {estimated_time / 60:.2f} minutes")
 ```
+
     a.
 ```{python}
 start_time = time.time()
@@ -355,6 +358,7 @@ calculate_nearest_distance, target_gdf=zips_withhospital_centroids, axis=1
 full_elapsed_time = time.time() - start_time
 print(f"Time taken for full dataset: {full_elapsed_time / 60:.2f} minutes")
 ```
+
 Estimated time for full dataset: 0.14 minutes
 Time taken for full dataset: 0.08 minutes
 They were quite off.
@@ -371,6 +375,7 @@ zips_texas_centroids['nearest_distance_miles'] = zips_texas_centroids['nearest_d
 
 average_distance_miles = zips_texas_centroids['nearest_distance_miles'].mean()
 ```
+
 5. 
     a.
     In miles.
@@ -378,6 +383,7 @@ average_distance_miles = zips_texas_centroids['nearest_distance_miles'].mean()
 ```{python}
 print(f"Average distance to the nearest hospital for each ZIP code in Texas (in miles): {average_distance_miles:.2f}")
 ```
+
     c.
 ```{python}
 import matplotlib.pyplot as plt
