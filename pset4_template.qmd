@@ -46,12 +46,11 @@ Please refer to the minilesson on code style
 1. 
 PRVDR_CTGRY_SBTYP_CD - Provider Category Subtype Code
 PRVDR_CTGRY_CD - Provider Category Code
-CHOW_DT - Change of Ownership Date
+PRVDR_NUM - CMS Certification Number
+PGM_TRMNTN_CD - current termination status
 CITY_NAME - City where the facility is located
 STATE_CD - State code
-SSA_CNTY_CD - County code
 ZIP_CD - Zip code of the facility
-CRTFD_BED_CNT - Certified bed count
 FAC_NAME - Facility name
 ST_ADR - Street address
 PRVDR_NUM - Provider Number
@@ -134,11 +133,71 @@ print(unique_hospitals_by_year)
 ## Identify hospital closures in POS file (15 pts) (*)
 
 1. 
+```{python}
+def load_and_filter_pos(file_path, year):
+    pos_data = pd.read_csv(file_path, low_memory=False, encoding='latin1')
+    pos_data['Year'] = year
+    return pos_data
+
+pos2016 = load_and_filter_pos('pos2016.csv', 2016)
+pos2017 = load_and_filter_pos('pos2017.csv', 2017)
+pos2018 = load_and_filter_pos('pos2018.csv', 2018)
+pos2019 = load_and_filter_pos('pos2019.csv', 2019)
+all_years_data = pd.concat([pos2016, pos2017, pos2018, pos2019], ignore_index=True)
+```
+```{python}
+pivoted_data = all_years_data.pivot_table(
+    index=['PRVDR_NUM', 'FAC_NAME', 'ZIP_CD'], 
+    columns='Year', 
+    values='PGM_TRMNTN_CD', 
+    aggfunc='first'
+).reset_index()
+```
+```{python}
+pivoted_data['Suspected_Closure_Year'] = pivoted_data.apply(
+    lambda row: next((year for year in [2017, 2018, 2019] if \
+        (pd.isna(row[year]) or row[year] != 0) and row[2016] == 0), None), axis=1)
+suspected_closures = pivoted_data.dropna(subset=['Suspected_Closure_Year'])
+```
+```{python}
+suspected_closures_list = suspected_closures[['FAC_NAME', 'ZIP_CD', 'Suspected_Closure_Year']]
+total_suspected_closures = len(suspected_closures)
+print(total_suspected_closures)
+```
+15730 hospital fit this definition
 2. 
+```{python}
+sorted_suspected_closures = suspected_closures_list.sort_values(by='FAC_NAME')
+sorted_suspected_closures.head(10)
+```
 3. 
     a.
+    ```{python}
+    zip_year_counts = all_years_data[all_years_data['PGM_TRMNTN_CD'] == 0].groupby(['ZIP_CD', 'Year']).size()
+    ```
+    ```{python}
+    suspected_closures['Is_Merger'] = suspected_closures.apply(
+    lambda row: (
+        zip_year_counts.get((row['ZIP_CD'], row['Suspected_Closure_Year'] + 1), 0) >= 
+        zip_year_counts.get((row['ZIP_CD'], row['Suspected_Closure_Year']), 0)
+    ) if row['Suspected_Closure_Year'] < 2019 else False,
+    axis=1)
+
+    potential_mergers = suspected_closures[suspected_closures['Is_Merger']]
+    corrected_closures = suspected_closures[~suspected_closures['Is_Merger']]
+    ```
     b.
+    ```{python}
+    num_potential_mergers = len(potential_mergers)
+    num_corrected_closures = len(corrected_closures)
+    print("Number of hospitals identified as potential mergers:", num_potential_mergers)
+    print("Number of hospitals remaining after correction:", num_corrected_closures)
+    ```
     c.
+    ```{python}
+    corrected_closures_sorted = corrected_closures[['FAC_NAME', 'ZIP_CD', 'Suspected_Closure_Year']].sort_values(by='FAC_NAME')
+    corrected_closures_sorted.head(10)
+    ```
 
 ## Download Census zip code shapefile (10 pt) 
 
@@ -147,6 +206,34 @@ print(unique_hospitals_by_year)
 2. 
 ```{python}
 import geopandas as gpd
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Load the shapefile
+zipcodes = gpd.read_file("gz_2010_us_860_00_500k.shp")
+
+# # Filter for Texas zip codes
+# texas_zipcodes = zipcodes[zipcodes['ZCTA5CE10'].str.startswith(('75', '76', '77', '78'))]
+
+# # Load POS data for 2016
+# pos2016 = pd.read_csv("pos2016.csv")  # Replace with actual path
+
+# # Group by ZIP code and count hospitals
+# hospital_counts = pos2016.groupby('ZIP_CD').size().reset_index(name='hospital_count')
+
+# # Merge hospital counts with Texas zip code shapefile
+# texas_zipcodes = texas_zipcodes.merge(hospital_counts, left_on='ZCTA5CE10', right_on='ZIP_CD', how='left')
+# texas_zipcodes['hospital_count'] = texas_zipcodes['hospital_count'].fillna(0)
+
+# # Plot the choropleth map
+# fig, ax = plt.subplots(1, 1, figsize=(12, 10))
+# texas_zipcodes.plot(column='hospital_count', cmap='OrRd', linewidth=0.8, ax=ax, edgecolor='0.8', legend=True)
+# plt.title('Number of Hospitals by Zip Code in Texas (2016)')
+# plt.xlabel('Longitude')
+# plt.ylabel('Latitude')
+# plt.show()
+
+
 
 ```
 
