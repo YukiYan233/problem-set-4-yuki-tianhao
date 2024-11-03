@@ -1,5 +1,5 @@
 ---
-title: "Your Title"
+title: "Problem Set 4_Yuki_Tianhao"
 format: 
   pdf:
     keep-tex: true
@@ -216,13 +216,13 @@ import geopandas as gpd
 import pandas as pd
 import matplotlib.pyplot as plt
 
-shapefile_path = "gz_2010_us_860_00_500k.shp"
+shapefile_path = "gz_2010_us_860_00_500k/gz_2010_us_860_00_500k.shp"
 zipcodes = gpd.read_file(shapefile_path)
 print("Shapefile loaded successfully!")
 
 print("Columns in shapefile:", zipcodes.columns)
 
-shapefile_path = "gz_2010_us_860_00_500k.shp"
+shapefile_path = "gz_2010_us_860_00_500k/gz_2010_us_860_00_500k.shp"
 zipcodes = gpd.read_file(shapefile_path)
 print("Columns in shapefile:", zipcodes.columns)
 
@@ -301,6 +301,8 @@ print("Number of unique ZIP codes in Texas and border states:", unique_texas_bor
 3. 
 ```{python}
 zips_texas_borderstates_centroids['ZCTA5'] = pd.to_numeric(zips_texas_borderstates_centroids['ZCTA5'], errors='coerce')
+pos2016['ZIP_CD'] = pd.to_numeric(pos2016['ZIP_CD'], errors='coerce')
+
 
 hospital_zip_codes_2016 = pos2016[['ZIP_CD']].drop_duplicates()
 zips_withhospital_centroids = zips_texas_borderstates_centroids.merge(
@@ -380,7 +382,6 @@ print(f"Average distance to the nearest hospital for each ZIP code in Texas (in 
 ```{python}
 import matplotlib.pyplot as plt
 
-# Plot the distance to the nearest hospital for each ZIP code
 fig, ax = plt.subplots(1, 1, figsize=(10, 10))
 zips_texas_centroids.plot(column='nearest_distance_miles', cmap='coolwarm', linewidth=0.8, ax=ax, edgecolor='0.8', legend=True)
 
@@ -405,7 +406,6 @@ closure_counts_sorted = closure_counts.sort_values(by='closure_count', ascending
 
 print("Texas Zip Codes and the Number of Hospital Closures (2016-2019):")
 print(closure_counts_sorted)
-
 ```
 
 2. 
@@ -422,7 +422,7 @@ corrected_closures_texas = corrected_closures[corrected_closures['ZIP_CD'].str[:
 
 closure_counts = corrected_closures_texas.groupby('ZIP_CD').size().reset_index(name='closure_count')
 
-shapefile_path = "gz_2010_us_860_00_500k.shp"
+shapefile_path = "gz_2010_us_860_00_500k/gz_2010_us_860_00_500k.shp"
 zipcodes = gpd.read_file(shapefile_path)
 zipcodes['ZCTA5'] = zipcodes['ZCTA5'].astype(str).str.zfill(5)
 texas_zipcodes = zipcodes[zipcodes['ZCTA5'].str[:2].isin(texas_zip_prefixes)]
@@ -439,7 +439,6 @@ plt.show()
 
 directly_affected_zipcodes = texas_zipcodes[texas_zipcodes['closure_count'] > 0]
 print("Number of directly affected Texas ZIP codes:", directly_affected_zipcodes.shape[0])
-
 ```
 
 3.
@@ -496,7 +495,6 @@ plt.title('Texas ZIP Codes Affected by Hospital Closures (2016-2019)')
 plt.xlabel('Longitude')
 plt.ylabel('Latitude')
 plt.show()
-
 ```
 
 
@@ -505,4 +503,4 @@ plt.show()
 Hospitals may close briefly for renovations or disasters, which the method might mistake as permanent closures. Mergers, ownership changes, or new CMS numbers could be falsely flagged as closures. There also might be data larges that there are delayed or incomplete updates that can misrepresent a facility's status. I could think of an improvement that uses cross-reference with multiple sources, which verifies closures by checking other datasets like state health departments or news reports. We could also track service types for changing services instead of truly closer. 
 
 2.
-The current approach identifies closures by checking if a hospital listed as “active” in 2016 is either not active or missing in later years. It adjusts for some mergers by removing suspected closures if the number of active hospitals in the ZIP code doesn’t decrease. It may misidentify closures if hospitals close and reopen under new certifications and in neighboring ZIP codes. It doesn’t account for population size, so it treats closures in densely populated and sparsely populated areas the same. Some improvement can be weighting closures by the population of the affected ZIP code to better understand the impact, or check if a hospital reopens in a neighboring ZIP code within a short distance, which may indicate a relocation rather than a true closure.
+The current method is to determine the closure rate by checking whether the hospitals listed as "active" in 2016 remained active or disappeared in subsequent years. The method adjusts for closures due to mergers by deleting hospitals in postal code areas where the number of active hospitals has not decreased. However, if a hospital closes and reopens in a neighboring postal code area under a new certification, the method may misidentify the closure. Furthermore, the method does not take population size into account, so the handling of closures is the same in areas with high and low population density. Some improvements can be made, such as weighting closures based on the population affected by the postal code area to better understand their impact, or checking whether the hospital reopens in a neighboring postal code area within a shorter distance, which may indicate a hospital relocation rather than a true closure.
