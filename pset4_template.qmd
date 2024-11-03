@@ -27,12 +27,12 @@ Please refer to the minilesson on code style
 ## Submission Steps (10 pts)
 1. This problem set is a paired problem set.
 2. Play paper, scissors, rock to determine who goes first. Call that person *Partner 1*.
-    - Partner 1 (name and cnet ID):
-    - Partner 2 (name and cnet ID):
+    - Partner 1 (name and cnet ID): Yuki Yan & yukiyan
+    - Partner 2 (name and cnet ID): Tianhao Zhang & tz2205
 3. Partner 1 will accept the `ps4` and then share the link it creates with their partner. You can only share it with one partner so you will not be able to change it after your partner has accepted. 
-4. "This submission is our work alone and complies with the 30538 integrity policy." Add your initials to indicate your agreement: \*\*\_\_\*\* \*\*\_\_\*\*
+4. "This submission is our work alone and complies with the 30538 integrity policy." Add your initials to indicate your agreement: \*\*\Y\Y\*\* \*\*\T\Z\*\*
 5. "I have uploaded the names of anyone else other than my partner and I worked with on the problem set **[here](https://docs.google.com/forms/d/185usrCREQaUbvAXpWhChkjghdGgmAZXA3lPWpXLLsts/edit)**"  (1 point)
-6. Late coins used this pset: \*\*\_\_\*\* Late coins left after submission: \*\*\_\_\*\*
+6. Late coins used this pset: \*\*\1\_\*\* Late coins left after submission: \*\*\1\_\*\*
 7. Knit your `ps4.qmd` to an PDF file to make `ps4.pdf`, 
     * The PDF should not be more than 25 pages. Use `head()` and re-size figures when appropriate. 
 8. (Partner 1): push  `ps4.qmd` and `ps4.pdf` to your github repo.
@@ -61,33 +61,28 @@ PRVDR_NUM - Provider Number
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Define a function to load and filter data for short-term hospitals by year
+
 def load_and_filter_pos(file_path, year):
-    # Load the data with a specified encoding
     pos_data = pd.read_csv(file_path, low_memory=False, encoding='latin1')
     
-    # Filter for short-term hospitals
     short_term_hospitals = pos_data[(pos_data['PRVDR_CTGRY_CD'] == 1) & 
                                     (pos_data['PRVDR_CTGRY_SBTYP_CD'] == 1)]
     
-    # Add a column for the year
+    # Add column 
     short_term_hospitals['Year'] = year
     print(f"Year {year} - Number of short-term hospitals: {len(short_term_hospitals)}")  # Check the count
     return short_term_hospitals
 
-# Load and filter each year's dataset individually
 pos2016 = load_and_filter_pos('pos2016.csv', 2016)
 pos2017 = load_and_filter_pos('pos2017.csv', 2017)
 pos2018 = load_and_filter_pos('pos2018.csv', 2018)
 pos2019 = load_and_filter_pos('pos2019.csv', 2019)
 
-# Append the datasets together
 all_years_data = pd.concat([pos2016, pos2017, pos2018, pos2019], ignore_index=True)
 
-# Count the number of observations by year in the combined data
 observations_by_year = all_years_data['Year'].value_counts().sort_index()
 
-# Plot the number of observations by year with more precise y-axis values
+# Plot 
 plt.figure(figsize=(10, 6))
 observations_by_year.plot(kind='bar')
 plt.title('Number of Short-Term Hospital Observations by Year')
@@ -96,7 +91,7 @@ plt.ylabel('Number of Observations')
 plt.ylim(7240, 7305)
 plt.yticks(range(7240, 7306, 5))
 
-# Set y-axis with a smaller range of intervals to capture subtle differences
+# y-axis
 plt.yticks(range(min(observations_by_year) - 10, max(observations_by_year) + 10, 10))
 
 plt.xticks(rotation=0)
@@ -186,6 +181,7 @@ sorted_suspected_closures.head(10)
     potential_mergers = suspected_closures[suspected_closures['Is_Merger']]
     corrected_closures = suspected_closures[~suspected_closures['Is_Merger']]
     ```
+
     b.
     ```{python}
     num_potential_mergers = len(potential_mergers)
@@ -205,35 +201,51 @@ sorted_suspected_closures.head(10)
     The .shp is Shapefile, which contains the geometry (spatial features) of the shapes, such as points, lines, or polygons. This has 845.9 MB which is largest. The .shx (Shape Index File), which is an index file that allows for quick access to the geometry in the .shp file. It essentially points to the spatial features, making it faster to query the shapefile. It has 266kb. The .dbf (Database File) contains attribute data (tabular data) related to each shape, stored in dBase format. Attributes might include details like names, zip codes, or other metadata associated with each geographic feature. It has 6.4 MB. The .prj (Projection File) defines the coordinate system and map projection used in the shapefile. This has 4 KB. The .xml (Metadata File) contains metadata about the shapefile, such as data source, creation information, and attribute descriptions. It has 16 KB.
 2. 
 ```{python}
+import os
+from pyproj import datadir
+
+os.environ["PROJ_LIB"] = "/opt/homebrew/Cellar/proj/9.5.0/share/proj"
+os.environ["PROJ_DATA"] = "/opt/homebrew/Cellar/proj/9.5.0/share/proj"
+
+datadir.set_data_dir("/opt/homebrew/Cellar/proj/9.5.0/share/proj")
+import pyproj
+print("PROJ data directory:", pyproj.datadir.get_data_dir())
+
+
 import geopandas as gpd
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Load the shapefile
-zipcodes = gpd.read_file("gz_2010_us_860_00_500k.shp")
+shapefile_path = "gz_2010_us_860_00_500k.shp"
+zipcodes = gpd.read_file(shapefile_path)
+print("Shapefile loaded successfully!")
 
-# # Filter for Texas zip codes
-# texas_zipcodes = zipcodes[zipcodes['ZCTA5CE10'].str.startswith(('75', '76', '77', '78'))]
+print("Columns in shapefile:", zipcodes.columns)
 
-# # Load POS data for 2016
-# pos2016 = pd.read_csv("pos2016.csv")  # Replace with actual path
+shapefile_path = "gz_2010_us_860_00_500k.shp"
+zipcodes = gpd.read_file(shapefile_path)
+print("Columns in shapefile:", zipcodes.columns)
 
-# # Group by ZIP code and count hospitals
-# hospital_counts = pos2016.groupby('ZIP_CD').size().reset_index(name='hospital_count')
+texas_zip_prefixes = ['75', '76', '77', '78', '79']
+texas_zipcodes = zipcodes[zipcodes['ZCTA5'].str.startswith(tuple(texas_zip_prefixes))]
 
-# # Merge hospital counts with Texas zip code shapefile
-# texas_zipcodes = texas_zipcodes.merge(hospital_counts, left_on='ZCTA5CE10', right_on='ZIP_CD', how='left')
-# texas_zipcodes['hospital_count'] = texas_zipcodes['hospital_count'].fillna(0)
+texas_zipcodes['ZCTA5'] = texas_zipcodes['ZCTA5'].astype(str)
 
-# # Plot the choropleth map
-# fig, ax = plt.subplots(1, 1, figsize=(12, 10))
-# texas_zipcodes.plot(column='hospital_count', cmap='OrRd', linewidth=0.8, ax=ax, edgecolor='0.8', legend=True)
-# plt.title('Number of Hospitals by Zip Code in Texas (2016)')
-# plt.xlabel('Longitude')
-# plt.ylabel('Latitude')
-# plt.show()
+pos2016 = pd.read_csv("pos2016.csv")
 
+pos2016['ZIP_CD'] = pos2016['ZIP_CD'].astype(str)
 
+hospital_counts = pos2016.groupby('ZIP_CD').size().reset_index(name='hospital_count')
+
+texas_zipcodes = texas_zipcodes.merge(hospital_counts, left_on='ZCTA5', right_on='ZIP_CD', how='left')
+texas_zipcodes['hospital_count'] = texas_zipcodes['hospital_count'].fillna(0)
+
+fig, ax = plt.subplots(1, 1, figsize=(12, 10))
+texas_zipcodes.plot(column='hospital_count', cmap='OrRd', linewidth=0.8, ax=ax, edgecolor='0.8', legend=True)
+plt.title('Number of Hospitals by Zip Code in Texas (2016)')
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+plt.show()
 
 ```
 
@@ -381,12 +393,116 @@ This makes sense, as ZIP codes closer to the U.S. border tend to have greater di
 ## Effects of closures on access in Texas (15 pts)
 
 1. 
+```{python}
+texas_zip_prefixes = ['75', '76', '77', '78', '79']
+corrected_closures['ZIP_CD'] = corrected_closures['ZIP_CD'].astype(str)
+
+texas_closures = corrected_closures[corrected_closures['ZIP_CD'].str.startswith(tuple(texas_zip_prefixes))]
+
+closure_counts = texas_closures.groupby('ZIP_CD').size().reset_index(name='closure_count')
+
+closure_counts_sorted = closure_counts.sort_values(by='closure_count', ascending=False)
+
+print("Texas Zip Codes and the Number of Hospital Closures (2016-2019):")
+print(closure_counts_sorted)
+
+```
+
 2. 
-3. 
+```{python}
+import os
+import geopandas as gpd
+import pandas as pd
+import matplotlib.pyplot as plt
+os.environ["PROJ_LIB"] = "/opt/homebrew/Cellar/proj/9.5.0/share/proj"
+
+texas_zip_prefixes = ['75', '76', '77', '78', '79']
+corrected_closures['ZIP_CD'] = corrected_closures['ZIP_CD'].astype(str).str.split('.').str[0].str.zfill(5)
+corrected_closures_texas = corrected_closures[corrected_closures['ZIP_CD'].str[:2].isin(texas_zip_prefixes)]
+
+closure_counts = corrected_closures_texas.groupby('ZIP_CD').size().reset_index(name='closure_count')
+
+shapefile_path = "gz_2010_us_860_00_500k.shp"
+zipcodes = gpd.read_file(shapefile_path)
+zipcodes['ZCTA5'] = zipcodes['ZCTA5'].astype(str).str.zfill(5)
+texas_zipcodes = zipcodes[zipcodes['ZCTA5'].str[:2].isin(texas_zip_prefixes)]
+
+texas_zipcodes = texas_zipcodes.merge(closure_counts, left_on='ZCTA5', right_on='ZIP_CD', how='left')
+texas_zipcodes['closure_count'] = texas_zipcodes['closure_count'].fillna(0)
+
+fig, ax = plt.subplots(1, 1, figsize=(12, 10))
+texas_zipcodes.plot(column='closure_count', cmap='OrRd', linewidth=0.8, ax=ax, edgecolor='0.8', legend=True)
+plt.title('Directly Affected Texas ZIP Codes by Hospital Closures (2016-2019)')
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+plt.show()
+
+directly_affected_zipcodes = texas_zipcodes[texas_zipcodes['closure_count'] > 0]
+print("Number of directly affected Texas ZIP codes:", directly_affected_zipcodes.shape[0])
+
+```
+
+3.
+```{python}
+import geopandas as gpd
+from geopandas.tools import sjoin
+import pandas as pd
+import matplotlib.pyplot as plt
+
+directly_affected_zipcodes_gdf = texas_zipcodes[texas_zipcodes['closure_count'] > 0]
+
+directly_affected_zipcodes_gdf = gpd.GeoDataFrame(directly_affected_zipcodes_gdf, geometry='geometry', crs="EPSG:4326")
+
+directly_affected_zipcodes_gdf = directly_affected_zipcodes_gdf.to_crs(epsg=2163) 
+
+buffered_zones = directly_affected_zipcodes_gdf.copy()
+buffered_zones['geometry'] = directly_affected_zipcodes_gdf.geometry.buffer(16093)  # 10 miles in meters
+
+texas_zipcodes_projected = texas_zipcodes.to_crs(epsg=2163)
+
+indirectly_affected_zipcodes = sjoin(texas_zipcodes_projected, buffered_zones, how="inner", predicate="intersects")
+
+print("Columns in indirectly_affected_zipcodes after spatial join:", indirectly_affected_zipcodes.columns)
+
+if 'ZCTA5' in indirectly_affected_zipcodes.columns:
+    column_name = 'ZCTA5'
+else:
+    column_name = indirectly_affected_zipcodes.columns[0]
+
+
+indirectly_affected_zipcodes = indirectly_affected_zipcodes[
+    ~indirectly_affected_zipcodes[column_name].isin(directly_affected_zipcodes_gdf['ZCTA5'])
+]
+
+num_indirectly_affected = indirectly_affected_zipcodes[column_name].nunique()
+print("Number of indirectly affected Texas ZIP codes:", num_indirectly_affected)
+
+```
+
 4. 
+```{python}
+import geopandas as gpd
+import matplotlib.pyplot as plt
+
+texas_zipcodes['impact_status'] = 'Unaffected'  # Default to unaffected
+texas_zipcodes.loc[texas_zipcodes['ZCTA5'].isin(directly_affected_zipcodes_gdf['ZCTA5']), 'impact_status'] = 'Directly Affected'
+
+texas_zipcodes.loc[texas_zipcodes['ZCTA5'].isin(indirectly_affected_zipcodes[column_name]), 'impact_status'] = 'Indirectly Affected'
+
+fig, ax = plt.subplots(1, 1, figsize=(12, 10))
+texas_zipcodes.plot(column='impact_status', cmap='coolwarm', linewidth=0.8, ax=ax, edgecolor='0.8', legend=True)
+
+plt.title('Texas ZIP Codes Affected by Hospital Closures (2016-2019)')
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+plt.show()
+
+```
+
 
 ## Reflecting on the exercise (10 pts) 
-
 1. 
-2.The current approach identifies closures by checking if a hospital listed as “active” in 2016 is either not active or missing in later years. It adjusts for some mergers by removing suspected closures if the number of active hospitals in the ZIP code doesn’t decrease. It may misidentify closures if hospitals close and reopen under new certifications and in neighboring ZIP codes. It doesn’t account for population size, so it treats closures in densely populated and sparsely populated areas the same. Some improvement can be weighting closures by the population of the affected ZIP code to better understand the impact, or check if a hospital reopens in a neighboring ZIP code within a short distance, which may indicate a relocation rather than a true closure.
+Hospitals may close briefly for renovations or disasters, which the method might mistake as permanent closures. Mergers, ownership changes, or new CMS numbers could be falsely flagged as closures. There also might be data larges that there are delayed or incomplete updates that can misrepresent a facility's status. I could think of an improvement that uses cross-reference with multiple sources, which verifies closures by checking other datasets like state health departments or news reports. We could also track service types for changing services instead of truly closer. 
 
+2.
+The current approach identifies closures by checking if a hospital listed as “active” in 2016 is either not active or missing in later years. It adjusts for some mergers by removing suspected closures if the number of active hospitals in the ZIP code doesn’t decrease. It may misidentify closures if hospitals close and reopen under new certifications and in neighboring ZIP codes. It doesn’t account for population size, so it treats closures in densely populated and sparsely populated areas the same. Some improvement can be weighting closures by the population of the affected ZIP code to better understand the impact, or check if a hospital reopens in a neighboring ZIP code within a short distance, which may indicate a relocation rather than a true closure.
