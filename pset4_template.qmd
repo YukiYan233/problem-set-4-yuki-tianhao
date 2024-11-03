@@ -54,6 +54,7 @@ ZIP_CD - Zip code of the facility
 CRTFD_BED_CNT - Certified bed count
 FAC_NAME - Facility name
 ST_ADR - Street address
+PRVDR_NUM - Provider Number
 
 2. 
     a.
@@ -142,9 +143,12 @@ print(unique_hospitals_by_year)
 ## Download Census zip code shapefile (10 pt) 
 
 1. 
-    a.
-    b. 
+    The .shp is Shapefile, which contains the geometry (spatial features) of the shapes, such as points, lines, or polygons. This has 845.9 MB which is largest. The .shx (Shape Index File), which is an index file that allows for quick access to the geometry in the .shp file. It essentially points to the spatial features, making it faster to query the shapefile. It has 266kb. The .dbf (Database File) contains attribute data (tabular data) related to each shape, stored in dBase format. Attributes might include details like names, zip codes, or other metadata associated with each geographic feature. It has 6.4 MB. The .prj (Projection File) defines the coordinate system and map projection used in the shapefile. This has 4 KB. The .xml (Metadata File) contains metadata about the shapefile, such as data source, creation information, and attribute descriptions. It has 16 KB.
 2. 
+```{python}
+import geopandas as gpd
+
+```
 
 ## Calculate zip code’s distance to the nearest hospital (20 pts) (*)
 
